@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Clase 38 - Recursividad y Memoización</title>
+  </head>
+  <body>
+    <script>
+
+      function entireDivision(dividend, divider) {
+        if (dividend < divider) {
+            return 0
+        }
+
+        return 1 + entireDivision(dividend - divider, divider)
+      }
+
+      function factorial(number) {
+          /* Used for storage the value on cache  and then return that value */
+          if (!this.cache) {
+              this.cache = {}
+          }
+
+          if (this.cache[n]) {
+              return this.cache[number]
+          }
+
+          if (number === 1) {
+              return 1
+          }
+
+          this.cache[number] = number * factorial(number - 1)
+          return this.cache[n]
+      }
+    </script>
+  </body>
+</html>
