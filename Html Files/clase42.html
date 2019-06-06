@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>El cabeza dice</title>
+    <style>
+      body {
+        margin: 0;
+        background: #dedede;
+        display: flex;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .gameboard {
+        height: 100vh;
+        width: 100vh;
+        border-radius: 50%;
+        overflow: hidden;
+        margin: 0 auto;
+        max-height: 60vh;
+        max-width: 60vh;
+      }
+
+      .colour {
+        width: 50%;
+        height: 50%;
+        display: inline-block;
+      }
+
+      .left {
+        float: left;
+      }
+
+      .right {
+        float: left;
+      }
+
+      .blue {
+        background: #22a6b3;
+      }
+
+      .blue.light {
+        background: #7ed6df;
+      }
+
+      .violet {
+        background: #be2edd;
+      }
+
+      .violet.light {
+        background: #e056fd;
+      }
+
+      .orange {
+        background: #f0932b;
+      }
+
+      .orange.light {
+        background: #ffbe76;
+      }
+
+      .green {
+        background: #6ab04c;
+      }
+
+      .green.light {
+        background: #badc58;
+      }
+
+      .btn-start {
+        width: 400px;
+        height: 100px;
+        background: #ecf0f1;
+        color: #2c3e50;
+        font-size: 2.5rem;
+        position: absolute;
+        top: calc(50% - 50px);
+        left: calc(50% - 200px);
+      }
+
+      .hide {
+        display: none;
+      }
+
+      * {
+          font-family: Arial, Helvetica, sans-serif
+      }
+    </style>
+  </head>
+  <body>
+    <div class="gameboard">
+      <div id="blue" class="blue colour left" data-colour="blue"></div>
+      <div id="violet" class="violet colour right" data-colour="violet"></div>
+      <div id="orange" class="orange colour left" data-colour="orange"></div>
+      <div id="green" class="green colour right" data-colour="green"></div>
+      <button id="btnStart" class="btn-start" onclick="startGame()">DURO AL CABE!!</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+    <script> 
+        /* Properties */
+        const btnStart = document.getElementById("btnStart")
+        const blue = document.getElementById("blue")
+        const violet = document.getElementById("violet")
+        const orange = document.getElementById("orange")
+        const green = document.getElementById("green")
+        const MAX_LEVEL = 10
+
+        /* Declaration on class */
+        class Game {
+            constructor() {
+                this.init()
+                this.generateSecuence()
+                setTimeout(() => {
+                    this.nextLevel()
+                }, 500);
+            }
+
+            init() {
+                this.toggleBtnStart()
+                this.chooseColour = this.chooseColour.bind(this)
+                this.level = 1
+                this.colours = {
+                    blue,
+                    violet,
+                    orange,
+                    green
+                }
+            }
+
+            toggleBtnStart(){
+                if (btnStart.classList.contains("hide")) {
+                    btnStart.classList.remove("hide")
+                } else {
+                    btnStart.classList.add("hide")
+                }
+            }
+
+            /* Declarate functions for the class */
+            generateSecuence() {
+                /* Generate an array with a specific number of elements */
+                this.secuence = new Array(MAX_LEVEL).fill(0).map(n => Math.floor(Math.random() * 4))
+            }
+
+            nextLevel() {
+                this.sublevel = 0
+                this.iluminateSecuence()
+                this.addClickEvent()
+            }
+
+            iluminateSecuence() {
+                for (let i = 0; i < this.level; i++) {
+                    const colour = this.transforNumToColor(this.secuence[i])
+                    setTimeout(() => {
+                        this.iluminateColor(colour)
+                    }, 1000 * i);
+                }
+            }
+
+            iluminateColor(colour) {
+                this.colours[colour].classList.add("light")
+                setTimeout(() => {
+                    this.turnOff(colour)
+                }, 350);
+            }
+
+            transforNumToColor(number) {
+                switch (number) {
+                    case 0:
+                        return "blue"
+                    case 1:
+                        return "violet"
+                    case 2:
+                        return "orange"
+                    case 3:
+                        return "green"
+                }
+            }
+
+            transforColorToNum(colour) {
+                switch (colour) {
+                    case "blue":
+                        return 0
+                    case "violet":
+                        return 1
+                    case "orange":
+                        return 2
+                    case "green":
+                        return 3
+                }
+            }
+
+            turnOff(colour) {
+                this.colours[colour].classList.remove("light")
+            }
+
+            chooseColour(event) {
+                const nameColour = event.target.dataset.colour
+                const numColour = this.transforColorToNum(nameColour)
+                this.iluminateColor(nameColour)
+                /* Verify if user press the right color */
+                if (numColour === this.secuence[this.sublevel]) {
+                    this.sublevel++
+                    if (this.sublevel === this.level) {
+                        this.level++
+                        this.removeClickEvent()
+                        if (this.level === (MAX_LEVEL + 1)) {
+                            this.winGame()
+                        } else {
+                            setTimeout(() => {
+                                this.nextLevel()
+                            }, 1500);
+                        }
+                    }
+                } else {
+                    this.loseGame()
+                }
+            }
+
+            /* Funtions for clicks on button */
+            addClickEvent() {
+                this.colours.blue.addEventListener("click", this.chooseColour)
+                this.colours.violet.addEventListener("click", this.chooseColour)
+                this.colours.orange.addEventListener("click", this.chooseColour)
+                this.colours.green.addEventListener("click", this.chooseColour)
+            }
+
+            removeClickEvent() {
+                this.colours.blue.removeEventListener("click", this.chooseColour)
+                this.colours.violet.removeEventListener("click", this.chooseColour)
+                this.colours.orange.removeEventListener("click", this.chooseColour)
+                this.colours.green.removeEventListener("click", this.chooseColour)
+            }
+
+            winGame() {
+                /* Use a library for present custom */
+                Swal.fire(
+                    'Excelente!',
+                    'Le pegaste a la cabeza!',
+                    'success'
+                )
+                .then(() => {
+                    this.init()
+                })
+            }
+
+            loseGame(){
+                Swal.fire({
+                    type: 'error',
+                    title: 'Perdiste'
+                })
+                .then(() => {
+                    this.removeClickEvent()
+                    this.init()
+                })
+            }
+        }
+
+        /* Declaration of start game */
+        function startGame() {
+            setTimeout(() => {
+                window.game = new Game()
+            }, 1000);
+        }
+    </script>
+  </body>
+</html>
